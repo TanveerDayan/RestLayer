@@ -1,0 +1,3 @@
+
+com.contactmgmt.datastore.hbase.impl.HbaseDAOImplTest
+com.contactmgmt.rest.RestServiceCallTest
