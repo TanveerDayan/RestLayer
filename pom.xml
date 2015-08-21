@@ -71,6 +71,6 @@
 
 	</dependencies>
 	<build>
-		<finalName>RestLayer2</finalName>
+		<finalName>RestLayer</finalName>
 	</build>
 </project>
