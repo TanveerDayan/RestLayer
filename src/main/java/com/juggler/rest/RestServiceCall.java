@@ -2,6 +2,7 @@ package com.juggler.rest;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -74,9 +75,10 @@ public class RestServiceCall {
 
 	@RequestMapping(value = "/addParticipant", method = RequestMethod.POST)
 	public @ResponseBody
-	void addParticipant(@RequestParam("activityId") String activityId,@RequestParam("userId") String userId) {
+	void addParticipant(@RequestParam("activityId") String activityId,
+			@RequestParam("userId") String userId) {
 		try {
-			activityImpl.addParticipant(activityId,userId);
+			activityImpl.addParticipant(activityId, userId);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -150,12 +152,46 @@ public class RestServiceCall {
 		}
 
 	}
-	
+
 	@RequestMapping(value = "/updateUser", method = RequestMethod.POST)
 	public @ResponseBody
 	void updateUser(@RequestParam("userJson") String userJson) {
 		try {
-			userImpl.updateUser(userJson);
+			JSONObject object = new JSONObject(userJson);
+			JSONObject existingObject = new JSONObject(
+					getUserDetail(object.getString(JugglerConstants.JSON_ID)));
+			Iterator<String> iterator = object.keys();
+			while (iterator.hasNext()) {
+				String key = iterator.next();
+				Object value = object.get(key);
+				if (!value.equals(null)) {
+					existingObject.put(key, value);
+				}
+			}
+			userImpl.createUser(existingObject.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@RequestMapping(value = "/activateUser", method = RequestMethod.POST)
+	public @ResponseBody
+	void activateUser(@RequestParam("userJson") String userJson) {
+		try {
+
+			JSONObject object = new JSONObject(userJson);
+			StringWriter writer = new StringWriter();
+			UserCreateVO vo = userImpl.getUserDetails(object
+					.getString(JugglerConstants.JSON_EMAILID));
+
+			if (vo.getActivationId().equals(object.get("activationId"))) {
+				vo.setUserStatus("Active");
+				mapper.writeValue(writer, vo);
+
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {

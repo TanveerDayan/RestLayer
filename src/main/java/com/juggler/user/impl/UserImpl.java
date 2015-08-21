@@ -1,12 +1,10 @@
 package com.juggler.user.impl;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -27,24 +25,7 @@ public class UserImpl {
 
 	}
 
-	public void updateUser(String userJson) throws IOException, JSONException {
-
-		JSONObject object = new JSONObject(userJson);
-		Query query = new Query(Criteria.where(JugglerConstants.MONGO_ID).is(
-				object.get(JugglerConstants.JSON_ID)));
-		Iterator<String> iterator = object.keys();
-		Update update = new Update();
-		while (iterator.hasNext()) {
-			String key = iterator.next();
-			Object value = object.get(key);
-
-			if (!value.equals(null)) {
-				update.set(key, value);
-			}
-		}
-
-		mongoTemplate.updateFirst(query, update, UserCreateVO.class);
-	}
+	
 
 	public UserCreateVO getUserDetails(String userId) throws IOException,
 			JSONException {
