@@ -42,8 +42,7 @@ public class RestServiceCall {
 	Logger logger = Logger.getLogger(RestServiceCall.class);
 
 	@RequestMapping(value = "/addActivity", method = RequestMethod.POST)
-	public @ResponseBody
-	void addActivity(@RequestParam("activityJson") String activityJson) {
+	public @ResponseBody void addActivity(@RequestParam("activityJson") String activityJson) {
 		try {
 			activityImpl.addActivity(activityJson);
 		} catch (IOException e) {
@@ -55,10 +54,8 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/persistAction", method = RequestMethod.POST)
-	public @ResponseBody
-	void persistAction(@RequestParam("userId") String userId,
-			@RequestParam("action") String action,
-			@RequestParam("activityId") String activityId) {
+	public @ResponseBody void persistAction(@RequestParam("userId") String userId,
+			@RequestParam("action") String action, @RequestParam("activityId") String activityId) {
 		long timeStamp = System.currentTimeMillis();
 		try {
 			ActionVO actionVO = new ActionVO();
@@ -74,8 +71,7 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/addParticipant", method = RequestMethod.POST)
-	public @ResponseBody
-	void addParticipant(@RequestParam("activityId") String activityId,
+	public @ResponseBody void addParticipant(@RequestParam("activityId") String activityId,
 			@RequestParam("userId") String userId) {
 		try {
 			activityImpl.addParticipant(activityId, userId);
@@ -86,14 +82,12 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/getActionDetails", method = RequestMethod.POST)
-	public @ResponseBody
-	String getActionDetails(@RequestParam("retrievalType") String type,
+	public @ResponseBody String getActionDetails(@RequestParam("retrievalType") String type,
 			@RequestParam("userId") String userId) {
 		JSONArray actionArray = null;
 		StringWriter writer = new StringWriter();
 		try {
-			List<ActionVO> actionVOList = actionImpl.getActionDetails(type,
-					userId);
+			List<ActionVO> actionVOList = actionImpl.getActionDetails(type, userId);
 			mapper.writeValue(writer, actionVOList);
 			actionArray = new JSONArray(writer.toString());
 		} catch (Exception e) {
@@ -103,8 +97,7 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/getActivity", method = RequestMethod.POST)
-	public @ResponseBody
-	String getActivity(@RequestParam("activityId") String activityId) {
+	public @ResponseBody String getActivity(@RequestParam("activityId") String activityId) {
 		JSONObject returnObject = null;
 		ActivityVO actVO = null;
 		StringWriter writer = new StringWriter();
@@ -123,15 +116,13 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/getSuggestedActivity", method = RequestMethod.POST)
-	public @ResponseBody
-	String getSuggestedActivity(@RequestParam("retrievalType") String type,
+	public @ResponseBody String getSuggestedActivity(@RequestParam("retrievalType") String type,
 			@RequestParam("userId") String userId) {
 		JSONArray activityArray = null;
 		StringWriter writer = new StringWriter();
 		try {
 			UserCreateVO userVO = userImpl.getUserDetails(userId);
-			List<ActivityVO> activityVO = activityImpl.getActivityBasedOnList(
-					userId, type, userVO.getHobbies());
+			List<ActivityVO> activityVO = activityImpl.getActivityBasedOnList(userId, type, userVO.getHobbies());
 			mapper.writeValue(writer, activityVO);
 			activityArray = new JSONArray(writer.toString());
 		} catch (Exception e) {
@@ -141,8 +132,7 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/createUser", method = RequestMethod.POST)
-	public @ResponseBody
-	void createUser(@RequestParam("userJson") String userJson) {
+	public @ResponseBody void createUser(@RequestParam("userJson") String userJson) {
 		try {
 			userImpl.createUser(userJson);
 		} catch (IOException e) {
@@ -154,12 +144,10 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/updateUser", method = RequestMethod.POST)
-	public @ResponseBody
-	void updateUser(@RequestParam("userJson") String userJson) {
+	public @ResponseBody void updateUser(@RequestParam("userJson") String userJson) {
 		try {
 			JSONObject object = new JSONObject(userJson);
-			JSONObject existingObject = new JSONObject(
-					getUserDetail(object.getString(JugglerConstants.JSON_ID)));
+			JSONObject existingObject = new JSONObject(getUserDetail(object.getString(JugglerConstants.JSON_ID)));
 			Iterator<String> iterator = object.keys();
 			while (iterator.hasNext()) {
 				String key = iterator.next();
@@ -178,19 +166,16 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/activateUser", method = RequestMethod.POST)
-	public @ResponseBody
-	void activateUser(@RequestParam("userJson") String userJson) {
+	public @ResponseBody void activateUser(@RequestParam("userJson") String userJson) {
 		try {
 
 			JSONObject object = new JSONObject(userJson);
 			StringWriter writer = new StringWriter();
-			UserCreateVO vo = userImpl.getUserDetails(object
-					.getString(JugglerConstants.JSON_EMAILID));
+			UserCreateVO vo = userImpl.getUserDetails(object.getString(JugglerConstants.JSON_EMAILID));
 
-			if (vo.getActivationId().equals(object.get("activationId"))) {
-				vo.setUserStatus("Active");
-				mapper.writeValue(writer, vo);
-
+			if (vo.getActivationId().equals(object.get("activationId").toString())) {
+				object.put("userStatus", "Active");
+				updateUser(object.toString());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -201,8 +186,7 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/getUserDetail", method = RequestMethod.POST)
-	public @ResponseBody
-	String getUserDetail(@RequestParam("userId") String userId) {
+	public @ResponseBody String getUserDetail(@RequestParam("userId") String userId) {
 		StringWriter writer = new StringWriter();
 		UserCreateVO userCreateVO = null;
 		JSONObject userDetailObject = null;
@@ -219,20 +203,16 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/validateUser", method = RequestMethod.POST)
-	public @ResponseBody
-	String validateUser(@RequestParam("userId") String userId) {
+	public @ResponseBody String validateUser(@RequestParam("userId") String userId) {
 		UserCreateVO userCreateVO = null;
 
 		JSONObject loginObject = new JSONObject();
 		try {
 			userCreateVO = userImpl.getUserDetails(userId);
 			if (userCreateVO != null) {
-				loginObject.put(JugglerConstants.JSON_PASSWORD,
-						userCreateVO.getPassword());
-				loginObject.put(JugglerConstants.JSON_EMAILID,
-						userCreateVO.getEmailId());
-				loginObject.put(JugglerConstants.JSON_ROLENAME,
-						userCreateVO.getRoleName());
+				loginObject.put(JugglerConstants.JSON_PASSWORD, userCreateVO.getPassword());
+				loginObject.put(JugglerConstants.JSON_EMAILID, userCreateVO.getEmailId());
+				loginObject.put(JugglerConstants.JSON_ROLENAME, userCreateVO.getRoleName());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -241,8 +221,7 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/friendSuggestion", method = RequestMethod.POST)
-	public @ResponseBody
-	String friendSuggestion(@RequestParam("userId") String userId) {
+	public @ResponseBody String friendSuggestion(@RequestParam("userId") String userId) {
 		JSONArray friendSuggestionArray = null;
 		UserCreateVO userCreateVO = null;
 		List<UserCreateVO> friendSuggestionList = null;
@@ -250,8 +229,7 @@ public class RestServiceCall {
 		try {
 			userCreateVO = userImpl.getUserDetails(userId);
 			List<String> userHobbies = userCreateVO.getHobbies();
-			friendSuggestionList = userImpl.getUserFriendSuggestion(userId,
-					userHobbies);
+			friendSuggestionList = userImpl.getUserFriendSuggestion(userId, userHobbies);
 			mapper.writeValue(writer, friendSuggestionList);
 			friendSuggestionArray = new JSONArray(writer.toString());
 		} catch (Exception e) {
@@ -261,46 +239,40 @@ public class RestServiceCall {
 	}
 
 	@RequestMapping(value = "/addFriend", method = RequestMethod.POST)
-	public @ResponseBody
-	String addFriend(@RequestParam("userId") String userId,
+	public @ResponseBody String addFriend(@RequestParam("userId") String userId,
 			@RequestParam("friendId") String friendId) {
 		userImpl.addFriend(userId, friendId);
 		return friendId;
 	}
 
 	@RequestMapping(value = "/acceptFriend", method = RequestMethod.POST)
-	public @ResponseBody
-	String acceptFriend(@RequestParam("userId") String userId,
+	public @ResponseBody String acceptFriend(@RequestParam("userId") String userId,
 			@RequestParam("friendId") String friendId) {
 		userImpl.acceptFriend(userId, friendId);
 		return friendId;
 	}
 
 	@RequestMapping(value = "/removeFriend", method = RequestMethod.POST)
-	public @ResponseBody
-	String removeFriend(@RequestParam("userId") String userId,
+	public @ResponseBody String removeFriend(@RequestParam("userId") String userId,
 			@RequestParam("friendId") String friendId) {
 		userImpl.removeFriend(userId, friendId);
 		return friendId;
 	}
 
 	@RequestMapping(value = "/cancelFriend", method = RequestMethod.POST)
-	public @ResponseBody
-	String cancelFriend(@RequestParam("userId") String userId,
+	public @ResponseBody String cancelFriend(@RequestParam("userId") String userId,
 			@RequestParam("friendId") String friendId) {
 		userImpl.cancelFriend(userId, friendId);
 		return friendId;
 	}
 
 	@RequestMapping(value = "/getUserFriendDetails", method = RequestMethod.POST)
-	public @ResponseBody
-	String getSentFriendRequests(@RequestParam("retrievalType") String type,
+	public @ResponseBody String getSentFriendRequests(@RequestParam("retrievalType") String type,
 			@RequestParam("userId") String userId) {
 		JSONArray friendArray = null;
 		StringWriter writer = new StringWriter();
 		try {
-			List<UserCreateVO> userVO = userImpl.getFriendRequestDetails(type,
-					userId);
+			List<UserCreateVO> userVO = userImpl.getFriendRequestDetails(type, userId);
 			mapper.writeValue(writer, userVO);
 			friendArray = new JSONArray(writer.toString());
 		} catch (Exception e) {
